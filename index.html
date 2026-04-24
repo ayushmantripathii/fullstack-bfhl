@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BFHL API Tester</title>
+  <style>
+    :root {
+      --bg-1: #f4f7fb;
+      --bg-2: #e7eef8;
+      --card: #ffffff;
+      --text: #1b2430;
+      --muted: #556274;
+      --accent: #0f6dff;
+      --accent-hover: #0c58cc;
+      --border: #d8e2f0;
+      --danger-bg: #fdecec;
+      --danger-text: #a91f2e;
+      --warning-bg: #fff3e6;
+      --warning-text: #b05800;
+      --success-bg: #ecf8f0;
+      --success-text: #155d2f;
+      --shadow: 0 22px 45px rgba(15, 45, 90, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 500px at 10% -10%, rgba(15, 109, 255, 0.12), transparent 60%),
+        radial-gradient(1000px 500px at 90% 110%, rgba(7, 156, 120, 0.12), transparent 60%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 24px;
+      background: linear-gradient(145deg, #ffffff, #f7fafe);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      padding: 22px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    label {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      border: 1px solid #c9d6e8;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: var(--text);
+      outline: none;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(15, 109, 255, 0.12);
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 120ms ease, background-color 120ms ease;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .error-banner {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f6c5cb;
+      font-size: 0.92rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr;
+    }
+
+    .meta-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .meta-item {
+      background: #f7faff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.94rem;
+    }
+
+    .pill-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.86rem;
+      border: 1px solid transparent;
+    }
+
+    .pill.invalid {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #f5bcc3;
+    }
+
+    .pill.duplicate {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border-color: #ffd9b0;
+    }
+
+    .summary {
+      border: 1px solid #b9e5c7;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.93rem;
+    }
+
+    .tree-wrap {
+      background: #f9fbff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      overflow-x: auto;
+    }
+
+    .tree {
+      margin: 0;
+      padding-left: 18px;
+      list-style: none;
+      font-size: 0.92rem;
+    }
+
+    .tree li {
+      margin: 4px 0;
+      position: relative;
+      padding-left: 10px;
+    }
+
+    .tree li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 6px;
+      height: 1px;
+      background: #8797ad;
+    }
+
+    .mono {
+      font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (min-width: 840px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1 class="title">BFHL Hierarchy API Client</h1>
+      <p class="subtitle">Paste your array of edges and submit to test the API response.</p>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <label for="inputData">Input Data (JSON Array)</label>
+        <textarea id="inputData" class="mono">["A->B", "B->C", "A->B"]</textarea>
+        <div class="actions">
+          <button id="submitBtn" type="button">Submit to API</button>
+          <span class="hint">POST http://localhost:3000/bfhl</span>
+        </div>
+        <div id="errorBanner" class="error-banner"></div>
+      </div>
+
+      <div class="card" id="responseCard">
+        <h2 style="margin-top: 0;">Response</h2>
+        <div id="responseContent" class="muted">Submit data to view response.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const submitBtn = document.getElementById("submitBtn");
+    const inputData = document.getElementById("inputData");
+    const responseContent = document.getElementById("responseContent");
+    const errorBanner = document.getElementById("errorBanner");
+
+    function showError(message) {
+      errorBanner.textContent = message;
+      errorBanner.style.display = "block";
+    }
+
+    function clearError() {
+      errorBanner.textContent = "";
+      errorBanner.style.display = "none";
+    }
+
+    function createTreeList(node, subtree) {
+      const li = document.createElement("li");
+      li.textContent = node;
+
+      const childKeys = Object.keys(subtree || {});
+      if (childKeys.length > 0) {
+        const ul = document.createElement("ul");
+        ul.className = "tree";
+        childKeys.forEach((child) => {
+          ul.appendChild(createTreeList(child, subtree[child]));
+        });
+        li.appendChild(ul);
+      }
+
+      return li;
+    }
+
+    function renderHierarchies(hierarchies) {
+      if (!Array.isArray(hierarchies) || hierarchies.length === 0) {
+        return '<p class="muted">No hierarchies found.</p>';
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "grid";
+
+      hierarchies.forEach((item, idx) => {
+        const box = document.createElement("div");
+        box.className = "card";
+
+        const title = document.createElement("h3");
+        title.textContent = `Hierarchy ${idx + 1}`;
+        title.style.marginTop = "0";
+        box.appendChild(title);
+
+        const info = document.createElement("p");
+        const depthText = typeof item.depth === "number" ? ` | Depth: ${item.depth}` : "";
+        const cycleText = item.has_cycle === true ? " | Cycle detected" : "";
+        info.innerHTML = `<strong>Root:</strong> ${item.root || "-"}${depthText}${cycleText}`;
+        box.appendChild(info);
+
+        const treeWrap = document.createElement("div");
+        treeWrap.className = "tree-wrap";
+
+        if (item.has_cycle === true) {
+          const p = document.createElement("p");
+          p.className = "mono";
+          p.style.margin = "0";
+          p.textContent = "{}";
+          treeWrap.appendChild(p);
+        } else {
+          const rootKey = item.root;
+          const treeObject = item.tree || {};
+          const rootTree = treeObject[rootKey];
+
+          if (!rootKey || typeof rootTree !== "object") {
+            const pre = document.createElement("pre");
+            pre.className = "mono";
+            pre.style.margin = "0";
+            pre.textContent = JSON.stringify(item.tree || {}, null, 2);
+            treeWrap.appendChild(pre);
+          } else {
+            const ul = document.createElement("ul");
+            ul.className = "tree";
+            ul.appendChild(createTreeList(rootKey, rootTree));
+            treeWrap.appendChild(ul);
+          }
+        }
+
+        box.appendChild(treeWrap);
+        wrapper.appendChild(box);
+      });
+
+      return wrapper;
+    }
+
+    function renderList(items, className, emptyText) {
+      if (!Array.isArray(items) || items.length === 0) {
+        return `<p class="muted">${emptyText}</p>`;
+      }
+
+      const ul = document.createElement("ul");
+      ul.className = "pill-list";
+
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.className = `pill ${className}`;
+        li.textContent = String(item);
+        ul.appendChild(li);
+      });
+
+      return ul;
+    }
+
+    function renderResponse(data) {
+      responseContent.innerHTML = "";
+
+      const fragment = document.createDocumentFragment();
+
+      const metaBox = document.createElement("div");
+      metaBox.className = "card";
+      metaBox.innerHTML = `
+        <h3 style="margin-top:0;">Identity</h3>
+        <ul class="meta-list">
+          <li class="meta-item"><strong>user_id:</strong> ${data.user_id || "-"}</li>
+          <li class="meta-item"><strong>email_id:</strong> ${data.email_id || "-"}</li>
+          <li class="meta-item"><strong>college_roll_number:</strong> ${data.college_roll_number || "-"}</li>
+        </ul>
+      `;
+      fragment.appendChild(metaBox);
+
+      const hierarchyBox = document.createElement("div");
+      hierarchyBox.className = "card";
+      hierarchyBox.innerHTML = "<h3 style=\"margin-top:0;\">Hierarchies</h3>";
+      const renderedHierarchies = renderHierarchies(data.hierarchies);
+      if (typeof renderedHierarchies === "string") {
+        hierarchyBox.insertAdjacentHTML("beforeend", renderedHierarchies);
+      } else {
+        hierarchyBox.appendChild(renderedHierarchies);
+      }
+      fragment.appendChild(hierarchyBox);
+
+      const issueGrid = document.createElement("div");
+      issueGrid.className = "grid";
+
+      const invalidBox = document.createElement("div");
+      invalidBox.className = "card";
+      invalidBox.innerHTML = "<h3 style=\"margin-top:0;\">Invalid Entries</h3>";
+      const invalid = renderList(data.invalid_entries, "invalid", "No invalid entries.");
+      if (typeof invalid === "string") {
+        invalidBox.insertAdjacentHTML("beforeend", invalid);
+      } else {
+        invalidBox.appendChild(invalid);
+      }
+
+      const duplicateBox = document.createElement("div");
+      duplicateBox.className = "card";
+      duplicateBox.innerHTML = "<h3 style=\"margin-top:0;\">Duplicate Edges</h3>";
+      const duplicates = renderList(data.duplicate_edges, "duplicate", "No duplicate edges.");
+      if (typeof duplicates === "string") {
+        duplicateBox.insertAdjacentHTML("beforeend", duplicates);
+      } else {
+        duplicateBox.appendChild(duplicates);
+      }
+
+      issueGrid.appendChild(invalidBox);
+      issueGrid.appendChild(duplicateBox);
+      fragment.appendChild(issueGrid);
+
+      const summaryBox = document.createElement("div");
+      summaryBox.className = "card";
+      summaryBox.innerHTML = "<h3 style=\"margin-top:0;\">Summary</h3>";
+
+      const summary = data.summary || {};
+      const summaryContent = document.createElement("div");
+      summaryContent.className = "summary";
+      summaryContent.innerHTML = `
+        <div><strong>Total Trees:</strong> ${summary.total_trees ?? "-"}</div>
+        <div><strong>Total Cycles:</strong> ${summary.total_cycles ?? "-"}</div>
+        <div><strong>Largest Tree Root:</strong> ${summary.largest_tree_root ?? "-"}</div>
+      `;
+      summaryBox.appendChild(summaryContent);
+
+      fragment.appendChild(summaryBox);
+      responseContent.appendChild(fragment);
+    }
+
+    async function submitData() {
+      clearError();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        let parsed;
+        try {
+          parsed = JSON.parse(inputData.value);
+        } catch (parseError) {
+          throw new Error("Input must be valid JSON. Example: [\"A->B\", \"B->C\"]");
+        }
+
+        if (!Array.isArray(parsed)) {
+          throw new Error("Input must be a JSON array of strings.");
+        }
+
+        const response = await fetch("http://localhost:3000/bfhl", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: parsed }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`API Error ${response.status}: ${text || "Unknown error"}`);
+        }
+
+        const data = await response.json();
+        renderResponse(data);
+      } catch (error) {
+        responseContent.innerHTML = '<p class="muted">Submit data to view response.</p>';
+        showError(error.message || "Request failed.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit to API";
+      }
+    }
+
+    submitBtn.addEventListener("click", submitData);
+  </script>
+</body>
+</html>
